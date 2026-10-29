@@ -1,10 +1,38 @@
 # AI Receipt Parser Demo
 
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-app%20real-61DAFB?logo=react&logoColor=black)
+![Expo](https://img.shields.io/badge/Expo-SDK%2057-000020?logo=expo&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?logo=openai&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?logo=googlegemini&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?logo=pydantic&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
 Módulo en Python que extrae datos estructurados de tickets/facturas (fecha,
 litros, subtotal, descuento, total real) usando modelos de visión (**GPT-4o**
 o **Gemini**), con **Pydantic** como contrato de salida y una regla de
 negocio determinística que decide el monto final — nunca el modelo de
 lenguaje por su cuenta.
+
+## 📱 Demo en Vivo
+
+![Demo de la app](./assets/demo.gif)
+
+> Captura tomada de la app real en producción (React Native + Expo) donde
+> nació este módulo: foto del ticket → extracción por visión → total real
+> calculado, sin que la IA toque la base de datos.
+
+## Resumen ejecutivo
+
+Los motores OCR tradicionales fallan sistemáticamente en tickets con
+descuento: confunden el **Subtotal** con el **Total**, porque el subtotal
+suele ser el número más grande y "gana" cualquier heurística ingenua de
+desempate. Este proyecto resuelve eso con un motor multimodal de IA
+(visión) que opera en **modo de extracción pasiva**: el modelo solo lee y
+devuelve datos tipados con Pydantic — nunca escribe en una base de datos, ni
+decide si un gasto se registra, ni se salta ninguna validación de negocio
+(como la del odómetro en la app original). Esa separación — IA lectora,
+backend dueño de la lógica — es la arquitectura central del proyecto.
 
 ## El problema real que resuelve
 
@@ -48,6 +76,33 @@ primer filtro, la función es la red de seguridad que lo corrige si se
 equivoca. Los tests de esa función (`tests/test_models.py`) corren **sin
 ninguna API key, sin red, sin IA** — la parte que más importa que esté bien
 nunca depende de que un LLM "se porte bien" en cada corrida.
+
+## Arquitectura: ciclo de datos
+
+```
+┌──────────────┐     bytes de imagen      ┌───────────────────────┐
+│  Foto del     │ ───────────────────────▶ │ VisionReceiptProvider │
+│  ticket       │                          │  (OpenAI / Gemini)    │
+└──────────────┘                          └───────────┬───────────┘
+                                                        │ ReceiptExtraction
+                                                        │ (Pydantic, solo datos)
+                                                        ▼
+                                           ┌───────────────────────┐
+                                           │  compute_total_real()  │
+                                           │  regla de negocio pura │
+                                           │  (sin IA, 100% testeada)│
+                                           └───────────┬───────────┘
+                                                        │ ParsedReceipt
+                                                        ▼
+                                           ┌───────────────────────┐
+                                           │  Tu aplicación         │
+                                           │  decide: ¿se registra? │
+                                           │  ¿falta un dato?       │
+                                           └───────────────────────┘
+```
+
+La IA nunca está a la derecha de esa última flecha — solo entrega datos,
+nunca toma la decisión final.
 
 ## Arquitectura de seguridad: IA en modo de extracción pasiva
 
