@@ -1,0 +1,39 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+.env/
+
+# Variables de entorno y credenciales — JAMÁS se commitean
+.env
+.env.*
+!.env.example
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Imágenes de prueba reales (pueden contener datos personales) — solo
+# samples/ con tickets sintéticos/de ejemplo se commitea
+*.jpg
+*.jpeg
+*.png
+!samples/*.jpg
+!samples/*.png
+!docs/**/*.png
+
+# Sistema operativo / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Builds
+build/
+dist/

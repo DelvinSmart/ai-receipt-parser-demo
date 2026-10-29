@@ -1,0 +1,10 @@
+[project]
+name = "ai-receipt-parser-demo"
+version = "0.1.0"
+description = "Extracción estructurada de tickets/facturas con IA de visión (GPT-4o / Gemini) en modo pasivo, con Pydantic y una regla de negocio determinística para el total real."
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
